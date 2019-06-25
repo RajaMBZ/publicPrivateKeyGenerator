@@ -1,0 +1,717 @@
+package javaapplication2;
+//imports for file writing (and reading) & pane
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.Writer;
+import java.util.Scanner;
+import javax.swing.JOptionPane;
+//imports for Google Authenticator
+import com.j256.twofactorauth.TimeBasedOneTimePasswordUtil;
+//imports for a new public/private key pair generation using elliptic curve cryptography
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.MessageDigest;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.Security;
+import java.security.interfaces.ECPrivateKey;
+import java.security.interfaces.ECPublicKey;
+import java.security.spec.ECGenParameterSpec;
+import java.security.spec.ECPoint;
+//imports for base58 encoding
+import com.google.bitcoin.core.Base58;
+import java.io.IOException;
+import java.security.GeneralSecurityException;
+//imports for messaging
+import java.net.*;
+import java.io.*;
+//GUI
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.FlowLayout;
+import java.awt.Frame;
+import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JTable;
+import javafx.scene.text.Font;
+
+
+class keys {
+
+    String filename2 = "C:\\Users\\Raja\\Desktop\\keys2.txt";
+    Scanner file2;
+
+    //the following integer will be the one used to determine the choice
+    int x12;
+
+    //the following string will be searched in the document
+    String s1;
+
+    void getter(int x) throws IOException {
+
+        this.file2 = new Scanner(new File(filename2));
+        this.x12 = x;
+        if (x12 == 1) {
+            String s = JOptionPane.showInputDialog("Private key of which public key? Enter public key!\n\n(if the private key of your specified public key doesn't exist, you'll be sent back to the previous step!)");
+            while (file2.hasNext()) {
+                if (s.equals(file2.next()))
+                    s1 =  file2.next();
+            }
+        }
+
+        if (x12 == 2) {
+            String s12 = JOptionPane.showInputDialog("Enter the website URL without any domain extension:");
+            String s22 = JOptionPane.showInputDialog("Enter the password:");
+            try (Writer output2 = new BufferedWriter(new FileWriter(filename2, true))) {
+                output2.append("\r\n" + s12);
+                output2.append("\r\n" + s22);
+            }
+        }
+    }
+
+    public String setter () {
+        return s1;
+    }
+}
+
+class TwoFA {
+
+    String base32Secret = "MZ2A5CPLL46MXZCP";
+
+    int x12;
+    
+    boolean process(int x) throws GeneralSecurityException {
+
+        this.x12 = x;
+        
+        //getting the final code from entered GA code and both the systems' synchronization
+        
+        String code = TimeBasedOneTimePasswordUtil.generateCurrentNumberString(base32Secret);
+
+        int xy = Integer.parseInt(code);
+
+        return x12 == xy;
+
+    }
+}
+
+class Passwords {
+    String filenamePasswords = "C:\\Users\\Raja\\Desktop\\manager.txt";
+    Scanner filePasswords;
+
+    //the following integer will be the one used to determine the choice
+    private int xPasswords;
+
+    //the following string will be searched in the document
+    String sPasswords;
+
+    void getter(int x) throws IOException {
+
+        this.filePasswords = new Scanner(new File(filenamePasswords));
+        this.xPasswords = x;
+        if (xPasswords == 1) {
+            String s = JOptionPane.showInputDialog("Password of which website? Enter URL without any domain extension!\n\n(if the password of your specified website doesn't exist, you'll be sent back to the previous step!)");
+            while (filePasswords.hasNext()) {
+                if (s.equals(filePasswords.next())) {
+                    sPasswords =  filePasswords.next();
+                }
+            }
+        }
+
+        if (xPasswords == 2) {
+            String s12p = JOptionPane.showInputDialog("Enter the public key:");
+            String s22p = JOptionPane.showInputDialog("Enter the private key:");
+            try (Writer output2 = new BufferedWriter(new FileWriter(filenamePasswords, true))) {
+                output2.append("\r\n" + s12p);
+                output2.append("\r\n" + s22p);
+            }
+        }
+    }
+
+    public String setter () {
+        return sPasswords;
+    }
+}
+
+class b3ActionListener implements ActionListener {
+    
+    void b3ActionListener(){
+        System.out.println("Button pressed");
+    }
+    @Override
+    public void actionPerformed (ActionEvent e){
+
+            String filename3 = "C:\\Users\\Raja\\Desktop\\Authy.txt";
+            Scanner file3 = null;
+        try {
+            file3 = new Scanner(new File(filename3));
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(b3ActionListener.class.getName()).log(Level.SEVERE, null, ex);
+        }
+            String xaa3 = JOptionPane.showInputDialog("1. Get the Google Authenticator backup code of a website\n2. Add a new Google Authenticator backup code\n-----------------------------------------------");
+            int x123 = Integer.parseInt(xaa3);
+
+            //////////////////////////////////////////////////////////////
+            
+            if (x123 == 1)  {
+                String s = JOptionPane.showInputDialog("Backup code of which website? Enter URL without any domain extension!\n\n(if the backup code of your specified website doesn't exist, you'll be sent back to the previous step!)");
+                while (file3.hasNext())  {
+                        if (s.equals(file3.next())) JOptionPane.showMessageDialog(null, "Your backup code for "+s+" is: "+file3.next());
+                }
+            }
+            
+            //////////////////////////////////////////////////////////////
+            
+            if (x123 == 2)    {
+                String s123 = JOptionPane.showInputDialog("Enter the website URL without any domain extension:");
+                String s223 = JOptionPane.showInputDialog("Enter the Google Authenticator backup code:");
+            try (Writer output3 = new BufferedWriter(new FileWriter(filename3, true))) {
+                output3.append("\r\n"+s123);
+                output3.append("\r\n"+s223);
+            }   catch (IOException ex) {
+                    Logger.getLogger(b3ActionListener.class.getName()).log(Level.SEVERE, null, ex);
+                }
+        }
+    }
+}
+
+class b2ActionListener implements ActionListener {
+    
+    void b2ActionListener(){
+        System.out.println("Button b pressed");
+    }
+    
+    String to64(String s) {
+
+    switch(s.length()) {
+    case 62: return "00" + s;
+    case 63: return "0" + s;
+    case 64: return s;
+    default:
+        throw new IllegalArgumentException("Invalid key: " + s);
+        }
+}
+    
+    @Override
+    public void actionPerformed (ActionEvent e){
+            String xaa2 = JOptionPane.showInputDialog("1. Read a private key by giving your public key\n2. Add a new private key\n3. Create a brand new public/private key pair\n-----------------------------------------------");
+            int x12 = Integer.parseInt(xaa2);
+            String filenametwo = "C:\\Users\\Raja\\Desktop\\keys2.txt";
+            Scanner filetwo = null;
+        try {
+            filetwo = new Scanner(new File(filenametwo));
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(b2ActionListener.class.getName()).log(Level.SEVERE, null, ex);
+        }
+            keys k = new keys();
+
+            if (x12==1 || x12==2)   {
+                if (x12==1) {
+                    String s = JOptionPane.showInputDialog("Private key of which public key? Enter public key!\n\n(if the private key of your specified public key doesn't exist, you'll be sent back to the previous step!)");
+                        while (filetwo.hasNext())  {
+                            
+                            
+                            if (s.equals(filetwo.next())){
+                                String foundIt = filetwo.next();
+                                JOptionPane.showMessageDialog(null, "Your private key for the public key "+s+" is: "+foundIt);
+                                System.out.println(foundIt);
+                            
+                            }
+                        
+                        }
+                }
+                try {
+                    k.getter(x12);
+                }               catch (IOException ex) {
+                                    Logger.getLogger(b2ActionListener.class.getName()).log(Level.SEVERE, null, ex);
+                                }
+            }
+
+            //////////////////////////////////////////////////////////////
+            
+            if (x12 == 3)   {
+
+                Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
+
+                KeyPairGenerator keyGen = null;
+                                try {
+                                    keyGen = KeyPairGenerator.getInstance("EC");
+                                } catch (NoSuchAlgorithmException ex) {
+                                    Logger.getLogger(b2ActionListener.class.getName()).log(Level.SEVERE, null, ex);
+                                }
+
+                ECGenParameterSpec secp = new ECGenParameterSpec("secp256k1");
+
+                                try {
+                                    keyGen.initialize(secp);
+                                } catch (InvalidAlgorithmParameterException ex) {
+                                    Logger.getLogger(b2ActionListener.class.getName()).log(Level.SEVERE, null, ex);
+                                }
+
+                KeyPair kp = keyGen.generateKeyPair();
+
+                PublicKey pub = kp.getPublic();
+
+                PrivateKey pvt = kp.getPrivate();
+        
+                ECPrivateKey epvt = (ECPrivateKey)pvt;
+
+                String public2private = to64(epvt.getS().toString(16)).toUpperCase();
+        
+                ECPublicKey epub = (ECPublicKey)pub;
+
+                ECPoint pt = epub.getW();
+
+                String xpath, ypath, bcPub;
+                
+                xpath = to64(pt.getAffineX().toString(16)).toUpperCase();
+
+                ypath = to64(pt.getAffineY().toString(16)).toUpperCase();
+
+                bcPub = "04" + xpath + ypath;
+
+                MessageDigest sha = null;
+                                try {
+                                    sha = MessageDigest.getInstance("SHA-256");
+                                } catch (NoSuchAlgorithmException ex) {
+                                    Logger.getLogger(b2ActionListener.class.getName()).log(Level.SEVERE, null, ex);
+                                }
+
+                byte[] s1 = null;
+                                try {
+                                    s1 = sha.digest(bcPub.getBytes("UTF-8"));
+                                } catch (UnsupportedEncodingException ex) {
+                                    Logger.getLogger(b2ActionListener.class.getName()).log(Level.SEVERE, null, ex);
+                                }
+
+                MessageDigest rmd = null;
+                try {
+                    rmd = MessageDigest.getInstance("RipeMD160", "BC");
+                } catch (NoSuchAlgorithmException ex) {
+                    Logger.getLogger(b2ActionListener.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (NoSuchProviderException ex) {
+                    Logger.getLogger(b2ActionListener.class.getName()).log(Level.SEVERE, null, ex);
+                }
+
+                byte[] rpmd = rmd.digest(s1);
+                byte[] rpmd2 = new byte[rpmd.length + 1];
+
+                rpmd2[0] = 0;
+
+                System.arraycopy(rpmd, 0, rpmd2, 1, rpmd.length);
+
+                byte[] s2, s3, arr1;
+
+                s2 = sha.digest(rpmd2);
+
+                s3 = sha.digest(s2);
+
+                arr1 = new byte[25];
+
+                System.arraycopy(rpmd2, 0, arr1, 0, rpmd2.length);
+                System.arraycopy(s3, 0, arr1, 20, 5);
+
+                String filename2 = "C:\\Users\\Raja\\Desktop\\keys2.txt";
+
+                try (Writer pubprivpair = new BufferedWriter(new FileWriter(filename2, true))) {
+                    pubprivpair.append("\r\n"+Base58.encode(arr1));
+                    pubprivpair.append("\r\n"+public2private);
+                }               catch (IOException ex) {
+                                    Logger.getLogger(b2ActionListener.class.getName()).log(Level.SEVERE, null, ex);
+                                }
+
+                JOptionPane.showMessageDialog(null, "Your public key = "+"0x"+Base58.encode(arr1)+"\nYour private key = "+public2private+"\n\nThis data has also been recorded in the file for the future use of same keys!");
+                System.out.println("Public key = "+"0x"+Base58.encode(arr1));
+                System.out.println("Private key = "+public2private);
+            }
+        }
+}
+
+class bActionListener implements ActionListener {
+    
+    void bActionListener(){
+        System.out.println("Button b pressed");
+    }
+    
+    @Override
+    public void actionPerformed (ActionEvent e) {
+            
+            String filename = "C:\\Users\\Raja\\Desktop\\manager.txt";
+            Scanner file = null;
+        try {
+            file = new Scanner(new File(filename));
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(bActionListener.class.getName()).log(Level.SEVERE, null, ex);
+        }
+            String xaa = JOptionPane.showInputDialog("1. Read a password\n2. Write a password\n-----------------------------------------------");
+            int x1 = 0;
+            try{        x1 = Integer.parseInt(xaa);
+
+            } catch(NumberFormatException z2){
+                System.out.println("Number format exception detected as well!");
+            }
+            
+            if (x1 == 1)  {
+                String s = JOptionPane.showInputDialog("Password of which website? Enter URL without any domain extension!\n\n(if the password of your specified website doesn't exist, you'll be sent back to the previous step!)");
+                while (file.hasNext())  {
+                        if (s.equals(file.next())) JOptionPane.showMessageDialog(null, "Your password for the website "+s+" is: "+file.next());
+                }
+            }
+
+            if (x1 == 2)    {
+                String s1 = JOptionPane.showInputDialog("Enter the website URL without any domain extension:");
+                String s2 = JOptionPane.showInputDialog("Enter the password:");
+
+                try (Writer output = new BufferedWriter(new FileWriter(filename, true))) {
+                    output.append("\r\n"+s1);
+                    output.append("\r\n"+s2);
+                } catch (IOException ex) {
+                    Logger.getLogger(bActionListener.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+    }
+}
+
+
+class URLConnDemo {
+
+    URLConnDemo() {
+try {
+String requestUrl  = "https://sendpk.com/api/sms.php?username=923495422024&password=7243&mobile=923495422024&sender=PasswordManager&message=SOMEONEJUSTLOGGEDIN!";
+URL url = new URL(requestUrl);
+HttpURLConnection uc = (HttpURLConnection)url.openConnection();
+System.out.println(uc.getResponseMessage());
+uc.disconnect();
+} catch(Exception ex) {
+System.out.println(ex.getMessage());
+}
+}
+    
+}
+
+public class JavaApplication2 {
+
+//completing a total of 64 characters in case the amount is less than that
+
+/*public static String to64(String s) {
+
+    switch(s.length()) {
+    case 62: return "00" + s;
+    case 63: return "0" + s;
+    case 64: return s;
+    default:
+        throw new IllegalArgumentException("Invalid key: " + s);
+        }
+}*/
+
+//Beginning of main
+    
+public static void main(String[] args) throws Exception {
+    
+//Beginning of Google Authenticator verification to enter the program
+
+//Google Authenticator class
+
+TwoFA ch = new TwoFA();
+
+//Taking input for 2FA Google Authentication
+    
+    String auth = JOptionPane.showInputDialog("Enter Google Authenticator code for the application: \n\n(entering a wrong GA code will close the progam)");
+
+//Converting to integer
+    
+    int xx = 0;
+
+try{        xx = Integer.parseInt(auth);
+
+} catch(NumberFormatException z0){
+    System.out.println("Number format exception detected as well!");
+}
+    
+//comparing
+    
+    if (ch.process(xx) == true) {
+        
+    //boolean loop = true;
+
+    JOptionPane.showMessageDialog(null, "Great, you've entered the correct 2-Factor Google Authenticator code! You can now proceed.....");
+    
+    //URLConnDemo ad = new URLConnDemo ();
+    
+            JButton b, b1, b2, b3; 
+        JFrame f;
+        JLabel l, l2, l3, l4, l5; 
+        // create a new frame to stor text field and button 
+        f = new JFrame("panel");   
+        // create a label to display text 
+        l = new JLabel("PASSWORDS/PRIVATE KEYS MANAGER"); 
+        l2 = new JLabel("---------------------------------------------");
+        l3 = new JLabel("---------------------------------------------");
+        l4 = new JLabel("---------------------------------------------");
+        l5 = new JLabel("---------------------------------------------");
+
+        // create a new buttons 
+        b = new JButton (" Manage your passwords"); 
+        b1 = new JButton(" Manage your private keys"); 
+        b2 = new JButton(" Manage your  GA backup codes");
+        b3 = new JButton(" To exit the app, click here!");
+  
+       
+        
+        b.addActionListener(new bActionListener());
+        b1.addActionListener(new b2ActionListener());
+        b2.addActionListener(new b3ActionListener());
+        b3.addActionListener(new ActionListener(){
+                @Override
+                public void actionPerformed(ActionEvent e){
+                    f.setVisible(false);
+                    f.dispose();
+                }});
+                
+        // create a panel to add buttons 
+        JPanel p = new JPanel(); 
+
+        // add buttons and textfield to panel 
+        p.add(l);
+        p.add(l2);
+        p.add(b);
+        p.add(l3);
+        p.add(b1); 
+        p.add(l4);
+        p.add(b2);
+        p.add(l5);
+        p.add(b3);
+
+        // setbackground of panel 
+        p.setBackground(Color.white); 
+  
+        // add panel to frame 
+        f.add(p); 
+  
+        // set the size of frame 
+        f.setSize(380, 300); 
+  
+        f.setLocationRelativeTo(null);
+
+        f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        
+        f.setVisible(true);
+
+    
+//loop for main menu
+    
+
+
+/*    while (loop) {
+
+//asking for choice
+        
+        String xa = JOptionPane.showInputDialog("PASSWORDS/PRIVATE KEYS/GOOGLE AUTHENTICATOR BACKUPS MANAGER\n-----------------------------------------------\nWhat would you like to do? (Enter the number)\n1. Manage passwords\n2. Manage private keys\n3. Manage Google Authenticator backup codes\n4. Exit the program\n-----------------------------------------------\n\n(entering a wrong number will close the progam)");
+
+//Converting choice to integer
+        int x = 0;
+try{        x = Integer.parseInt(xa);
+
+} catch(NumberFormatException z1){
+    System.out.println("Number format exception detected as well!");
+}
+
+//using switch to pass the choice of user
+
+        switch (x)  {
+
+        //THE FIRST CASE
+        
+        case 1:
+            String filename = "C:\\Users\\Raja\\Desktop\\manager.txt";
+            Scanner file = new Scanner(new File(filename));
+            String xaa = JOptionPane.showInputDialog("1. Read a password\n2. Write a password\n-----------------------------------------------");
+            int x1 = 0;
+            try{        x1 = Integer.parseInt(xaa);
+
+            } catch(NumberFormatException z2){
+                System.out.println("Number format exception detected as well!");
+            }
+            if (x1 == 1)  {
+                String s = JOptionPane.showInputDialog("Password of which website? Enter URL without any domain extension!\n\n(if the password of your specified website doesn't exist, you'll be sent back to the previous step!)");
+                while (file.hasNext())  {
+                        if (s.equals(file.next())) JOptionPane.showMessageDialog(null, "Your password for the website "+s+" is: "+file.next());
+                }
+            }
+
+            if (x1 == 2)    {
+                String s1 = JOptionPane.showInputDialog("Enter the website URL without any domain extension:");
+                String s2 = JOptionPane.showInputDialog("Enter the password:");
+
+                try (Writer output = new BufferedWriter(new FileWriter(filename, true))) {
+                    output.append("\r\n"+s1);
+                    output.append("\r\n"+s2);
+                }
+            }
+            break;
+
+        //THE SECOND CASE
+            
+        case 2:
+            String xaa2 = JOptionPane.showInputDialog("1. Read a private key by giving your public key\n2. Add a new private key\n3. Create a brand new public/private key pair\n-----------------------------------------------");
+            int x12 = Integer.parseInt(xaa2);
+            String filenametwo = "C:\\Users\\Raja\\Desktop\\keys2.txt";
+            Scanner filetwo = new Scanner(new File(filenametwo));
+            keys k = new keys();
+
+            if (x12==1 || x12==2)   {
+                if (x12==1) {
+                    String s = JOptionPane.showInputDialog("Private key of which public key? Enter public key!\n\n(if the private key of your specified public key doesn't exist, you'll be sent back to the previous step!)");
+                        while (filetwo.hasNext())  {
+                            
+                            
+                            if (s.equals(filetwo.next())){
+                                String foundIt = filetwo.next();
+                                JOptionPane.showMessageDialog(null, "Your private key for the public key "+s+" is: "+foundIt);
+                                System.out.println(foundIt);
+                            
+                            }
+                        
+                        }
+                }
+                try {
+                    k.getter(x12);
+                } catch (IOException e) {}
+            }
+
+            //////////////////////////////////////////////////////////////
+            
+            if (x12 == 3)   {
+
+                Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
+
+                KeyPairGenerator keyGen = KeyPairGenerator.getInstance("EC");
+
+                ECGenParameterSpec secp = new ECGenParameterSpec("secp256k1");
+
+                keyGen.initialize(secp);
+
+                KeyPair kp = keyGen.generateKeyPair();
+
+                PublicKey pub = kp.getPublic();
+
+                PrivateKey pvt = kp.getPrivate();
+        
+                ECPrivateKey epvt = (ECPrivateKey)pvt;
+
+                String public2private = to64(epvt.getS().toString(16)).toUpperCase();
+        
+                ECPublicKey epub = (ECPublicKey)pub;
+
+                ECPoint pt = epub.getW();
+
+                String xpath, ypath, bcPub;
+                
+                xpath = to64(pt.getAffineX().toString(16)).toUpperCase();
+
+                ypath = to64(pt.getAffineY().toString(16)).toUpperCase();
+
+                bcPub = "04" + xpath + ypath;
+
+                MessageDigest sha = MessageDigest.getInstance("SHA-256");
+
+                byte[] s1 = sha.digest(bcPub.getBytes("UTF-8"));
+
+                MessageDigest rmd = MessageDigest.getInstance("RipeMD160", "BC");
+
+                byte[] rpmd = rmd.digest(s1);
+                byte[] rpmd2 = new byte[rpmd.length + 1];
+
+                rpmd2[0] = 0;
+
+                System.arraycopy(rpmd, 0, rpmd2, 1, rpmd.length);
+
+                byte[] s2, s3, arr1;
+
+                s2 = sha.digest(rpmd2);
+
+                s3 = sha.digest(s2);
+
+                arr1 = new byte[25];
+
+                System.arraycopy(rpmd2, 0, arr1, 0, rpmd2.length);
+                System.arraycopy(s3, 0, arr1, 20, 5);
+
+                String filename2 = "C:\\Users\\Raja\\Desktop\\keys2.txt";
+
+                try (Writer pubprivpair = new BufferedWriter(new FileWriter(filename2, true))) {
+                    pubprivpair.append("\r\n"+Base58.encode(arr1));
+                    pubprivpair.append("\r\n"+public2private);
+                }
+
+                JOptionPane.showMessageDialog(null, "Your public key = "+"0x"+Base58.encode(arr1)+"\nYour private key = "+public2private+"\n\nThis data has also been recorded in the file for the future use of same keys!");
+                System.out.println("Public key = "+"0x"+Base58.encode(arr1));
+                System.out.println("Private key = "+public2private);
+            }
+                break;
+
+        //THE THIRD CASE
+
+        case 3:
+            String filename3 = "C:\\Users\\Raja\\Desktop\\Authy.txt";
+            Scanner file3 = new Scanner(new File(filename3));
+            String xaa3 = JOptionPane.showInputDialog("1. Get the Google Authenticator backup code of a website\n2. Add a new Google Authenticator backup code\n-----------------------------------------------");
+            int x123 = Integer.parseInt(xaa3);
+
+            //////////////////////////////////////////////////////////////
+            
+            if (x123 == 1)  {
+                String s = JOptionPane.showInputDialog("Backup code of which website? Enter URL without any domain extension!\n\n(if the backup code of your specified website doesn't exist, you'll be sent back to the previous step!)");
+                while (file3.hasNext())  {
+                        if (s.equals(file3.next())) JOptionPane.showMessageDialog(null, "Your backup code for "+s+" is: "+file3.next());
+                }
+            }
+            
+            //////////////////////////////////////////////////////////////
+            
+            if (x123 == 2)    {
+                String s123 = JOptionPane.showInputDialog("Enter the website URL without any domain extension:");
+                String s223 = JOptionPane.showInputDialog("Enter the Google Authenticator backup code:");
+            try (Writer output3 = new BufferedWriter(new FileWriter(filename3, true))) {
+                output3.append("\r\n"+s123);
+                output3.append("\r\n"+s223);
+            }
+            }
+        break;
+
+        //THE FOURTH CASE
+            
+        case 4:
+            loop = false;
+            break;
+            
+        //THE DEFAULT CASE 
+            
+        default:
+            JOptionPane.showMessageDialog(null, "Please enter the correct number; the program will now run again!");
+        }
+        
+        //////////////////////////////////////////////////////////////
+        
+    }*/
+}
+    
+    else {
+         JOptionPane.showMessageDialog(null, "You should not break into others' computer systems like this!");
+    }
+
+   }
+}
